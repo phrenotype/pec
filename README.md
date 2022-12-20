@@ -26,7 +26,9 @@ It currently supports linux and macOs, and work is in progress to add support fo
 
 # Bit Distribution
 TIMESTAMP ---------- 45 BITS
+
 CUSTOM BITS -------  9 BITS
+
 SEQUENCE BITS -----  10 BITS
 
 ## Usage
@@ -34,6 +36,11 @@ Copy the file `pec` and add it to your PATH, or you can refer to it using it's a
 
 The default epoch is January 1st, 2022.
 
+The only thing you need to pass is a customId. It could be any number between 0 and 511 (both inclusive).
+
+Please once you use a customId to generate id's for a project, you must keep using that customId for that project.
+
+Using a customId of `5`
 ```shell
 >> pec 5
 16023976762414081
