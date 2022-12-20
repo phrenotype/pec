@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+
+last_ts_filename=".last_munix_ts"
+
+# Epoch is January 1st, 2022
+epoch=1640991600000
+
+ts_bits=45
+custom_bits=9
+sequence_bits=10
+
+max_ts=$((-1 ^ $((-1 << $ts_bits))))
+max_cid=$((-1 ^ $((-1 << $custom_bits))))
+max_seq=$((-1 ^ $((-1 << $sequence_bits))))
+
+global_seq=0
+
+if [ -e "$last_ts_filename" ]; then
+    read global_last_ts <$last_ts_filename
+else
+    global_last_ts=0
+fi
+
+function wait_till_next_ms() {
+    local last_ts=$1
+    local current_ts=$(($(date '+%s%N') / 1000000))
+    while [ $current_ts -le $last_ts ]; do
+        local current_ts=$(($(date '+%s%N') / 1000000))
+    done
+    echo $current_ts
+}
+
+function next_id() {
+    local cid=$1
+    local sequence=$global_seq
+    local last_ts=$global_last_ts
+
+    local current_ts=$(($(date '+%s%N') / 1000000))
+
+    local ts=$(($current_ts - $epoch))
+
+    if (($last_ts > $ts)); then
+        echo "Clock has moved backwards."
+        exit
+    fi
+
+    if (($last_ts != $ts)); then
+        sequence=$(($((sequence + 1)) & $max_seq))
+        if (($sequence == 0)); then
+            current_ts=$(wait_till_next_ms $last_ts)
+        fi
+    else
+        sequence=0
+    fi
+
+    # Setting new values
+    global_last_ts=$ts
+    echo $global_last_ts >$last_ts_filename
+    global_seq=$sequence
+
+    final=$(($ts << $(($custom_bits + $sequence_bits))))
+    final=$(($final | $(($cid << $sequence_bits))))
+    final=$(($final | $sequence))
+
+    echo $final
+}
+
+# Ensuring a custom ID is passed
+if [ -z "$1" ]; then
+    echo "PEC"
+    echo "unique id (64-bit integer) generator"
+    echo ""
+    echo ""
+    echo "Usage:"
+    echo "pec customID [epochInMilliSeconds]"
+    exit
+elif [ $1 -lt 0 ] || [ $1 -gt $max_cid ]; then
+    echo "Custom ID must be between 0 and $max_cid"
+    exit
+fi
+
+# Optionally checking if a user defined epoch was passed
+if [ -n "$2" ]; then
+    epoch=$2
+fi
+
+echo $(next_id $1)
