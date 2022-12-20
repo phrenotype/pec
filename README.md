@@ -53,6 +53,18 @@ To use your own timestamp,
 16023976762414081
 ```
 
+Now, to use it from a script, you can use the `system` or `exec` commands or whatever function your framework or language offers to run shell commands.
+
+For instance in php,
+
+```php
+<?php
+
+$id = system("pec 5")
+
+echo $id;
+```
+
 ## OS support
 For now, only linux and macOS are supported. Support for windows will soon be added.
 
