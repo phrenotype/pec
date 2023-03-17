@@ -67,12 +67,12 @@ function next_id() {
 
 # Ensuring a custom ID is passed
 if [ -z "$1" ]; then
-    echo "PEC"
-    echo "unique id (64-bit integer) generator"
+    echo -e "PEC"
+    echo -e "\tA unique id (64-bit integer) generator"
     echo ""
     echo ""
-    echo "Usage:"
-    echo "pec customID [epochInMilliSeconds]"
+    echo -e "Usage:"
+    echo -e "\tpec customID [epochInMilliSeconds]"
     exit
 elif [ $1 -lt 0 ] || [ $1 -gt $max_cid ]; then
     echo "Custom ID must be between 0 and $max_cid"
